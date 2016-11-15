@@ -2,13 +2,15 @@ package com.consumer
 
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
-import org.apache.spark.rdd.RDD
+import org.apache.spark.rdd.RDD  
 
+//http://ted-gao.blogspot.co.il/2011/09/mixing-scala-and-java-in-project.html
 object Main {
   
   def main(args: Array[String])
   {
-    
+    val instance = new com.consumer.java.MnistMLPExample();
+    com.consumer.java.MnistMLPExample.run()
     val conf = new SparkConf().setAppName("Word Counter");
     conf.setMaster("local")
     val sc = new SparkContext(conf);
