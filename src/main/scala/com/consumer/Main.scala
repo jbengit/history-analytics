@@ -8,6 +8,7 @@ object Main {
   
   def main(args: Array[String])
   {
+    
     val conf = new SparkConf().setAppName("Word Counter");
     conf.setMaster("local")
     val sc = new SparkContext(conf);
