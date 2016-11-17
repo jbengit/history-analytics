@@ -4,6 +4,7 @@ package com.consumer.java;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -15,12 +16,14 @@ import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.spark.api.TrainingMaster;
 import org.deeplearning4j.spark.impl.multilayer.SparkDl4jMultiLayer;
 import org.deeplearning4j.spark.impl.paramavg.ParameterAveragingTrainingMaster;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +39,7 @@ public class HistoryDeepLearning {
 
 	    private static int numEpochs = 15;
 
-	    public static void run() throws Exception {
+	    public static void train() throws Exception {
 	        
 	      
 
@@ -94,14 +97,19 @@ public class HistoryDeepLearning {
 
 	        //Execute training:
 	        for (int i = 0; i < numEpochs; i++) {
-	            sparkNet.fit(trainData);
+	            MultiLayerNetwork network = sparkNet.fit(trainData);
+	           Nd4j.writeTxt(network.params(), "C:\\tmp\\data\\spark-output\\MINST\\params" + i + ".txt", ",");	          
+	           FileUtils.writeStringToFile(new java.io.File("C:\\tmp\\data\\spark-output\\MINST\\conf" + i + ".json"), network.getLayerWiseConfigurations().toJson());
 	            log.info("Completed Epoch {}", i);
 	        }
+	      
 
 	        //Perform evaluation (distributed)
 	        Evaluation evaluation = sparkNet.evaluate(testData);
 	        log.info("***** Evaluation *****");
-	        log.info(evaluation.stats());
+	        String eval = evaluation.stats();
+	        log.info(eval);
+	        FileUtils.writeStringToFile(new java.io.File("C:\\tmp\\data\\spark-output\\MINST\\result.txt"), eval);
 
 	        //Delete the temp training files, now that we are done with them
 	        tm.deleteTempFiles(sc);
