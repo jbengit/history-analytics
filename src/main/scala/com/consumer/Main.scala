@@ -11,7 +11,8 @@ object Main {
   {
     //val instance = new com.consumer.java.MnistMLPExample();
    // com.consumer.java.MnistMLPExample.run()
-    com.consumer.java.HistoryDeepLearning.run()
+    //com.consumer.java.HistoryDeepLearning.trainAndTest("mnist");
+    com.consumer.java.HistoryDeepLearning.loadAndTest("mnist");
     return
     val conf = new SparkConf().setAppName("Word Counter");
     conf.setMaster("local")
