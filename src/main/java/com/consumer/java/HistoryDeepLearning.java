@@ -77,7 +77,7 @@ public class HistoryDeepLearning {
 	    	 //TODO
 	    	INDArray params = Nd4j.readTxt("C:\\tmp\\data\\spark-output\\MINST\\params" + 15 + ".txt");
 	    	network.getNetwork().setParams(params);
-	    	throw new Exception("Not implemented");
+	    	//throw new Exception("Not implemented");
 	    }
 	    
 	    public static void loadAndTest(String name) throws Exception
