@@ -39,6 +39,12 @@ public class HistoryDeepLearning {
 
 	    private static int numEpochs = 15;
 
+	    public static void load() throws Exception
+	    {
+	    	
+	    	
+	    }
+	    
 	    public static void train() throws Exception {
 	        
 	      
