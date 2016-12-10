@@ -1,5 +1,6 @@
 package com.consumer.java.mapreduce;
 
+import java.io.Console;
 import java.io.File;
 
 import org.apache.commons.collections.KeyValue;
@@ -37,16 +38,44 @@ public class MapReduceDriver {
 	Job job = null;
 	JobConfig jobConfig = null;
 	
-	String rootBasePath = "C:\\tmp\\data\\";
+	String rootBasePath = "C:\\tmp\\data";
+	String hadoopPath = "D:\\tools\\hadoop-2.7.3\\etc\\hadoop";
+	String jobName = "RFM";	
 	
 	public static void main(String[] args) throws Exception {
 		
 		MapReduceDriver instance = new MapReduceDriver();
-		JobConfig conf = instance.createRFMJobConfig();
-	//	JobConfig conf = instance.createHistoryByAmountJobConfig();
-		//JobConfig conf = instance.createHistoryByFrequencyJobConfig();
+		if(args.length > 0)
+		{
+			instance.hadoopPath = args[0];
+			instance.rootBasePath = args[1];
+			instance.jobName = args[2]; 
+		}
+		System.out.println("***Hadoop job configuration");
+		System.out.println("Hadoop job parameters:");
+		System.out.println("Hadoop Path" + instance.hadoopPath);
+		System.out.println("Root base Path" + instance.rootBasePath);
+		System.out.println("Job Name" + instance.jobName);
+		JobConfig conf = instance.createJobConfig(instance.jobName);		
+		System.out.println("***Hadoop job init");
 		instance.Init(conf);
+		System.out.println("***Hadoop job launch");
 		instance.Launch();		
+	}
+	
+	JobConfig createJobConfig(String jobName)
+	{
+		switch(jobName)
+		{
+			case "RFM":
+				return createRFMJobConfig();
+			case "HistoryByAmount":
+				return createHistoryByAmountJobConfig();
+			case "HistoryByFrequency":
+				return createHistoryByFrequencyJobConfig();
+			default:
+				return null;
+		}		
 	}
 	
 	public JobConfig createRFMJobConfig()
@@ -105,6 +134,7 @@ public class MapReduceDriver {
 		Path inputPath = new Path(rootBasePath + "\\input\\" + jobConfig.InputDirectory);
 		Path outputPath = new Path("in_" + jobConfig.JobName);
 		FileSystem fs = FileSystem.get(conf);
+		System.out.println("***Hadoop job import in HDFS from \"" + inputPath + "\" to \"" + outputPath + "\"" );
 		if(!fs.exists(outputPath))
 		{				
 			fs.copyFromLocalFile(inputPath, outputPath);	
@@ -117,7 +147,8 @@ public class MapReduceDriver {
 		Path inputPath = new Path("out_" + jobConfig.JobName);
 		String outputPath = rootBasePath + "\\output\\" + jobConfig.JobName;
 		FileSystem fs = FileSystem.get(conf);
-		org.apache.commons.io.FileUtils.deleteDirectory(new File(outputPath));						 
+		org.apache.commons.io.FileUtils.deleteDirectory(new File(outputPath));
+		System.out.println("***Hadoop job output generation in \"" + outputPath + "\"");
 		fs.copyToLocalFile(inputPath, new Path(outputPath));			
 	}
 	
@@ -136,8 +167,8 @@ public class MapReduceDriver {
 		jobConfig = config;
 		conf = new Configuration();
 		
-		conf.addResource(new Path("C:\\cygwin64\\home\\joelb\\hadoop-2.6.4\\etc\\hadoop\\core-site.xml"));
-		conf.addResource(new Path("C:\\cygwin64\\home\\joelb\\hadoop-2.6.4\\etc\\hadoop\\hdfs-site.xml"));
+		conf.addResource(new Path(hadoopPath + "core-site.xml"));
+		conf.addResource(new Path(hadoopPath + "hdfs-site.xml"));
 		
 		InitOptions();
 		
@@ -156,9 +187,12 @@ public class MapReduceDriver {
 	public void Launch() throws Exception
 	{
 		if(job.waitForCompletion(true))
-		{
+		{			
 			ExportFilesFromHDFS();
 		}
+		else
+			System.out.println("***Hadoop job failed. No result generated");
+		
 		return;					
 	}
 

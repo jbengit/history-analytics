@@ -1,0 +1,1 @@
+java  -cp ../target/history-analytics-1.0-SNAPSHOT-jar-with-dependencies.jar com.consumer.java.mapreduce.MapReduceDriver D:\tools\hadoop-2.7.3\etc\hadoop C:\tmp\data RFM

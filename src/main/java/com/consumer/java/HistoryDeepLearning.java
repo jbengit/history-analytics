@@ -72,10 +72,9 @@ public class HistoryDeepLearning {
 	    }
 	    
 	    
-	    private static void load(SparkDl4jMultiLayer network) throws Exception
+	    private static void load(SparkDl4jMultiLayer network, String name) throws Exception
 	    {
-	    	 //TODO
-	    	INDArray params = Nd4j.readTxt("C:\\tmp\\data\\spark-output\\MINST\\params" + 15 + ".txt");
+	    	INDArray params = Nd4j.readTxt("C:\\tmp\\data\\spark-output\\" + name + "MINST\\params" + 15 + ".txt");
 	    	network.getNetwork().setParams(params);
 	    	//throw new Exception("Not implemented");
 	    }
@@ -84,7 +83,7 @@ public class HistoryDeepLearning {
 	    {
 	    	initSpark(name);
 	    	createNetwork();
-	    	load(network);	   
+	    	load(network, name);	   
 	    	createTestDataSet();
 	    	test(network);
 	    	dispose();

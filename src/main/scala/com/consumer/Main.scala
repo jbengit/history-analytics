@@ -10,8 +10,9 @@ object Main {
   def main(args: Array[String])
   {
     //val instance = new com.consumer.java.MnistMLPExample();
-   // com.consumer.java.MnistMLPExample.run()
+   // com.consumer.java.MnistMLPExample.run(e)
     //com.consumer.java.HistoryDeepLearning.trainAndTest("mnist");
+    
     com.consumer.java.HistoryDeepLearning.loadAndTest("mnist");
     return
     val conf = new SparkConf().setAppName("Word Counter");
