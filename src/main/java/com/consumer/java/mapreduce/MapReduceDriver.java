@@ -116,13 +116,11 @@ public class MapReduceDriver {
 			
 			@Override
 			public Object getValue() {
-				// TODO Auto-generated method stub
 				return true;
 			}
 			
 			@Override
 			public Object getKey() {
-				// TODO Auto-generated method stub
 				return "useFrequency";
 			}
 		};

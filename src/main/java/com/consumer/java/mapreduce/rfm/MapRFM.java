@@ -45,8 +45,7 @@ public class MapRFM extends Mapper<Object, Text, Text, IntAndDoubleWritable>
 								
 			try {
 				date = parserSDF.parse(transactionDate);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
+			} catch (ParseException e) {				
 				log.error(e.toString());				
 			}		
 			double amount = Double.parseDouble(amountString);		

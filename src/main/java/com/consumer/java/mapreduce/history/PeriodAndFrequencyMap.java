@@ -51,8 +51,7 @@ public class PeriodAndFrequencyMap extends Mapper<Object, Text, Text, HistoryRed
 								
 			try {
 				date = parserSDF.parse(transactionDate);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
+			} catch (ParseException e) {			
 				log.error(e.toString());				
 			}		
 		if(date.before(minDate))
