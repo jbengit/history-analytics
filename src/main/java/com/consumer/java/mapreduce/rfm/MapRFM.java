@@ -25,10 +25,11 @@ public class MapRFM extends Mapper<Object, Text, Text, IntAndDoubleWritable>
 	@Override
 	public void map(Object ikey, Text value, Context context) throws IOException, InterruptedException
 	{				
+		
 		//word.set("hello");	    
 		//context.write(word, one);
 		String v = value.toString();
-		if(v.startsWith("TransactionId"))
+		if(v.contains("TransactionId"))
 			return;
 		String[] result = v.toString().split(",");
 				
@@ -48,8 +49,8 @@ public class MapRFM extends Mapper<Object, Text, Text, IntAndDoubleWritable>
 				// TODO Auto-generated catch block
 				log.error(e.toString());				
 			}		
-		double amount = Double.parseDouble(amountString);
-		
+			double amount = Double.parseDouble(amountString);		
+				
 		int diffInMonths = (int) Math.floor(( maxDate.getTime() - date.getTime()) 
                 / ((double)1000 * 60 * 60 * 24 * 30));		
 		word.set(memId);		 
