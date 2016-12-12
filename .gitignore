@@ -4,3 +4,5 @@ target/*
 ./.settings/
 ./.settings/*
 
+/pom.old
+/.cache-main

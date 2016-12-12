@@ -2,7 +2,6 @@ package com.consumer.java.datasets.history;
 
 import org.apache.commons.io.FileUtils;
 import org.deeplearning4j.datasets.fetchers.BaseDataFetcher;
-import org.deeplearning4j.datasets.mnist.MnistManager;
 import org.deeplearning4j.util.MathUtils;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
@@ -20,7 +19,7 @@ public class HistoryDataFetcher extends BaseDataFetcher {
 	    protected static final String TEMP_ROOT = System.getProperty("user.home");
 	    protected static final String MNIST_ROOT = TEMP_ROOT + File.separator + "MNIST" + File.separator;
 
-	    protected transient MnistManager man;
+	    protected transient HistoryManager man;
 	    protected boolean binarize = true;
 	    protected boolean train;
 	    protected int[] order;
@@ -54,11 +53,11 @@ public class HistoryDataFetcher extends BaseDataFetcher {
 	        }
 
 	        try {
-	            man = new MnistManager(images, labels, train);
+	            man = new HistoryManager(images, labels, train);
 	        }catch(Exception e) {
 	            FileUtils.deleteDirectory(new File(MNIST_ROOT));
 	            new HistoryFetcher().downloadAndUntar();
-	            man = new MnistManager(images, labels, train);
+	            man = new HistoryManager(images, labels, train);
 	        }
 
 	        numOutcomes = 10;

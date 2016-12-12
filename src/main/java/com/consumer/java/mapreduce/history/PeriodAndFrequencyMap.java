@@ -27,7 +27,7 @@ public class PeriodAndFrequencyMap extends Mapper<Object, Text, Text, HistoryRed
 	public void map(Object ikey, Text value, Context context) throws IOException, InterruptedException
 	{				
 		String v = value.toString();
-		if(v.startsWith("TransactionId"))
+		if(v.contains("TransactionId"))
 			return;
 		String[] result = v.toString().split(",");
 					
@@ -51,8 +51,7 @@ public class PeriodAndFrequencyMap extends Mapper<Object, Text, Text, HistoryRed
 								
 			try {
 				date = parserSDF.parse(transactionDate);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
+			} catch (ParseException e) {			
 				log.error(e.toString());				
 			}		
 		if(date.before(minDate))

@@ -8,7 +8,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.deeplearning4j.datasets.iterator.impl.MnistDataSetIterator;
 import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -28,21 +27,22 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.consumer.java.datasets.history.*;
 
 public class HistoryDeepLearning {
 	  private static final Logger log = LoggerFactory.getLogger(HistoryDeepLearning.class);	  
-	    private static boolean useSparkLocal = true;	  
-	    private static int batchSizePerWorker = 16;
+	    private boolean useSparkLocal = true;	  
+	    protected  int batchSizePerWorker = 16;
 	  	    
-	    private static JavaSparkContext sc = null;
+	    protected JavaSparkContext sc = null;
 	    
-	    private static JavaRDD<DataSet> trainData = null;
-	    private static JavaRDD<DataSet> testData = null;
-	    private static SparkDl4jMultiLayer network = null;	 
-	    private static TrainingMaster tm = null;
+	    protected JavaRDD<DataSet> trainData = null;
+	    protected JavaRDD<DataSet> testData = null;
+	    private SparkDl4jMultiLayer network = null;	 
+	    private TrainingMaster tm = null;
 	
         //Create network configuration and conduct network training
-	    private static MultiLayerConfiguration BuildNetworkConfiguration()
+	    private MultiLayerConfiguration BuildNetworkConfiguration()
 	    {
 	    	return new NeuralNetConfiguration.Builder()
             .seed(12345)
@@ -61,7 +61,7 @@ public class HistoryDeepLearning {
             .build();	    	
 	    }
 	    
-	    private static void initSpark(String name)
+	    private void initSpark(String name)
 	    {
 	    	SparkConf sparkConf = new SparkConf();
 	        if (useSparkLocal) {
@@ -72,57 +72,56 @@ public class HistoryDeepLearning {
 	    }
 	    
 	    
-	    private static void load(SparkDl4jMultiLayer network) throws Exception
+	    private void load(SparkDl4jMultiLayer network, String rootBasePath, String jobName) throws Exception
 	    {
-	    	 //TODO
-	    	INDArray params = Nd4j.readTxt("C:\\tmp\\data\\spark-output\\MINST\\params" + 15 + ".txt");
+	    	INDArray params = Nd4j.readTxt(rootBasePath + "\\spark-output\\" + jobName + "\\params" + 15 + ".txt");
 	    	network.getNetwork().setParams(params);
 	    	//throw new Exception("Not implemented");
 	    }
 	    
-	    public static void loadAndTest(String name) throws Exception
+	    public void loadAndTest(String rootBasePath, String jobName, String jobParameter) throws Exception
 	    {
-	    	initSpark(name);
+	    	initSpark(jobName);
 	    	createNetwork();
-	    	load(network);	   
-	    	createTestDataSet();
-	    	test(network);
+	    	load(network, rootBasePath, jobName);	   
+	    	createTestDataSet(rootBasePath, jobParameter);
+	    	test(network, rootBasePath);
 	    	dispose();
 	    	log.info("***** Example Complete *****");	    
 	    }
 	    
-	    private static void createNetwork()
+	    private void createNetwork()
 	    {
 	    	MultiLayerConfiguration conf = BuildNetworkConfiguration();	        			        
 	        tm = BuildTrainingParameters();	        
 	        network =  BuildNetwork(conf, tm);		    	
 	    }
 	    
-	    public static void trainAndTest(String name) throws Exception
+	    public void trainAndTest(String rootBasePath, String jobName, String jobParameter) throws Exception
 	    {
-	    	initSpark(name);
+	    	initSpark(jobName);
 	    	createNetwork();
-	    	train(network, 15);
-	    	createTrainDataSet();
-	    	createTestDataSet();
-	    	test(network);
+	    	createTrainDataSet(rootBasePath, jobParameter);
+	    	train(network, 15, rootBasePath, jobName);	    	
+	    	createTestDataSet(rootBasePath, jobParameter);
+	    	test(network, rootBasePath);
 	    	dispose();
 	    	log.info("***** Example Complete *****");
 	    }
 	    
-	    private static void test(SparkDl4jMultiLayer sparkNet) throws Exception
+	    private void test(SparkDl4jMultiLayer sparkNet, String rootBasePath) throws Exception
 	    {
 	    	 //Perform evaluation (distributed)
 	        Evaluation evaluation = sparkNet.evaluate(testData);
 	        log.info("***** Evaluation *****");
 	        String eval = evaluation.stats();
 	        log.info(eval);
-	        FileUtils.writeStringToFile(new java.io.File("C:\\tmp\\data\\spark-output\\MINST\\result.txt"), eval);	    	
+	        FileUtils.writeStringToFile(new java.io.File(rootBasePath + "\\spark-output\\MINST\\result.txt"), eval);	    	
 	    }
 	    
-	    private static void createTestDataSet() throws Exception
+	    protected void createTestDataSet(String rootBasePath, String jobParameter) throws Exception
 	    {	    	
-	    	  DataSetIterator iterTest = new MnistDataSetIterator(batchSizePerWorker, true, 12345);
+	    	  DataSetIterator iterTest = new HistoryDataSetIterator(batchSizePerWorker, false, 12345);
 	    	   List<DataSet> testDataList = new ArrayList<DataSet>();
 	 	      
 		        while (iterTest.hasNext()) {
@@ -131,9 +130,9 @@ public class HistoryDeepLearning {
 		        testData = sc.parallelize(testDataList);
 	    }
 	    
-	    private static void createTrainDataSet() throws Exception
+	    protected void createTrainDataSet(String rootBasePath, String jobParameter) throws Exception
 	    {
-	    	 DataSetIterator iterTrain = new MnistDataSetIterator(batchSizePerWorker, true, 12345);
+	    	 DataSetIterator iterTrain = new HistoryDataSetIterator(batchSizePerWorker, true, 12345);
 	    	 List<DataSet> trainDataList = new ArrayList<DataSet>();
 	    	  while (iterTrain.hasNext()) {
 		            trainDataList.add(iterTrain.next());
@@ -141,7 +140,7 @@ public class HistoryDeepLearning {
 	    	  trainData = sc.parallelize(trainDataList);
 	    }
 	    
-	    private static TrainingMaster BuildTrainingParameters()
+	    private TrainingMaster BuildTrainingParameters()
 	    {
 	    	 //Configuration for Spark training: see http://deeplearning4j.org/spark for explanation of these configuration options
 	        return new ParameterAveragingTrainingMaster.Builder(batchSizePerWorker)    //Each DataSet object: contains (by default) 32 examples
@@ -152,23 +151,23 @@ public class HistoryDeepLearning {
 	    }
 	    
 	    //Create the Spark network
-	    private static SparkDl4jMultiLayer BuildNetwork(MultiLayerConfiguration conf, TrainingMaster tm)
+	    private SparkDl4jMultiLayer BuildNetwork(MultiLayerConfiguration conf, TrainingMaster tm)
 	    {
 	    	return new SparkDl4jMultiLayer(sc, conf, tm);	    	
 	    }
-	    public static void dispose()
+	    public void dispose()
 	    {
 	    	  //Delete the temp training files, now that we are done with them
 	        tm.deleteTempFiles(sc);	      
 	    }
 	    
-	    public static void train(SparkDl4jMultiLayer sparkNet, int numEpochs) throws Exception {	       
+	    public void train(SparkDl4jMultiLayer sparkNet, int numEpochs, String rootBasePath, String jobName) throws Exception {	       
 	               	         	        
 	        //Execute training:
 	        for (int i = 0; i < numEpochs; i++) {
 	            MultiLayerNetwork network = sparkNet.fit(trainData);
-	           Nd4j.writeTxt(network.params(), "C:\\tmp\\data\\spark-output\\MINST\\params" + i + ".txt", ",");	          
-	           FileUtils.writeStringToFile(new java.io.File("C:\\tmp\\data\\spark-output\\MINST\\conf" + i + ".json"), network.getLayerWiseConfigurations().toJson());
+	           Nd4j.writeTxt(network.params(), rootBasePath + "\\spark-output\\" + jobName + "\\params" + i + ".txt", ",");	          
+	           FileUtils.writeStringToFile(new java.io.File(rootBasePath + "\\spark-output\\" + jobName + "\\conf" + i + ".json"), network.getLayerWiseConfigurations().toJson());
 	            log.info("Completed Epoch {}", i);
 	        }       	       
 	    }
