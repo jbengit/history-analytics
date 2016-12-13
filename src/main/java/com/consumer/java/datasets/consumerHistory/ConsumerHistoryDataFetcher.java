@@ -61,8 +61,8 @@ public class ConsumerHistoryDataFetcher extends BaseDataFetcher {
 	        for( int i=0; i<order.length; i++ ) order[i] = i;
 	        rng = new Random(rngSeed);
 	        reset();    //Shuffle order
-	    }
-	  
+	    }	  	    	
+	    
 	    @Override
 	    public void fetch(int numExamples) {
 	        if(!hasMore()) {
@@ -88,8 +88,8 @@ public class ConsumerHistoryDataFetcher extends BaseDataFetcher {
 
 	            float[] featureVec = new float[history.length];
 	            featureData[actualExamples] = featureVec;
-	            labelData[actualExamples] = new float[10];
-	            labelData[actualExamples][label] = 1.0f;
+	            labelData[actualExamples] = new float[2];
+	            labelData[actualExamples][label] = 1.0f;//label could be or 0 or 1
 
 	            for( int j=0; j<history.length; j++ ){
 	                float v = ((int)history[j]); //byte is loaded as signed -> convert to unsigned

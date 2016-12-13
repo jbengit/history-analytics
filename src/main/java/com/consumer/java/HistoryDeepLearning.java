@@ -40,6 +40,9 @@ public class HistoryDeepLearning {
 	    protected JavaRDD<DataSet> testData = null;
 	    private SparkDl4jMultiLayer network = null;	 
 	    private TrainingMaster tm = null;
+	    
+	    protected int outNeuronCount = 10; //figures between 1 and 10
+	    protected int inNeuronCount = 28 *28; //image size
 	
         //Create network configuration and conduct network training
 	    private MultiLayerConfiguration BuildNetworkConfiguration()
@@ -53,10 +56,10 @@ public class HistoryDeepLearning {
             .updater(Updater.NESTEROVS).momentum(0.9)
             .regularization(true).l2(1e-4)
             .list()
-            .layer(0, new DenseLayer.Builder().nIn(28 * 28).nOut(500).build())
+            .layer(0, new DenseLayer.Builder().nIn(inNeuronCount).nOut(500).build())
             .layer(1, new DenseLayer.Builder().nIn(500).nOut(100).build())
             .layer(2, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-                .activation("softmax").nIn(100).nOut(10).build())
+                .activation("softmax").nIn(100).nOut(outNeuronCount).build())
             .pretrain(false).backprop(true)
             .build();	    	
 	    }
@@ -164,7 +167,9 @@ public class HistoryDeepLearning {
 	    public void train(SparkDl4jMultiLayer sparkNet, int numEpochs, String rootBasePath, String jobName) throws Exception {	       
 	               	         	        
 	        //Execute training:
+	    	log.info("***** Start training ... *****");
 	        for (int i = 0; i < numEpochs; i++) {
+	        	log.info("***** Training epoch: " + numEpochs+ " *****");
 	            MultiLayerNetwork network = sparkNet.fit(trainData);
 	           Nd4j.writeTxt(network.params(), rootBasePath + "\\spark-output\\" + jobName + "\\params" + i + ".txt", ",");	          
 	           FileUtils.writeStringToFile(new java.io.File(rootBasePath + "\\spark-output\\" + jobName + "\\conf" + i + ".json"), network.getLayerWiseConfigurations().toJson());

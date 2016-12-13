@@ -6,3 +6,5 @@ target/*
 
 /pom.old
 /.cache-main
+/.cache-main.old
+/.classpath.old

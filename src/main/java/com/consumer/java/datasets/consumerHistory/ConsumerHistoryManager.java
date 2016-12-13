@@ -11,16 +11,25 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.consumer.java.HistoryDeepLearning;
+
+import breeze.linalg.logAndNormalize;
+
 public class ConsumerHistoryManager {
 	    private byte[][] imagesArr;
 	    private int[] labelsArr;
-	    private static final int HISTORY_SIZE = 12; //  last year + 3 months.
+	    public static final int HISTORY_SIZE = 12; //  last year + 3 months.
 	    private static final int TEST_PERIOD = 3; // 3 months to check if the user spent or not.
 	    	    
 		public int currentLabel;
 		public int[] currentHistory;
 		private int currentIndex;
-		private String[] historyLines;
+		private List<String> historyLines;
+		
+		  private static final Logger log = LoggerFactory.getLogger(ConsumerHistoryManager.class);
 	    
 	    /**
 	     * Constructs an instance managing the two given data files. Supports
@@ -41,11 +50,16 @@ public class ConsumerHistoryManager {
 	    
 	    private void loadData(String inputFilePath, boolean fromStart, int percentage) throws IOException
 	    {
+ 	    	log.info("**** loading data from " + inputFilePath + "...");
 	    	List<String> lines= Files.readAllLines(Paths.get(inputFilePath),
 	    			StandardCharsets.UTF_8);
+	    	log.info("**** " + lines.size() + " loaded.");
+	    	log.info("**** selecting" + percentage + " %...");
 	    	int fromIndex = fromStart ? 0 :  lines.size() * percentage / 100;
-	    	int toIndex = fromStart ? (lines.size() - lines.size() * percentage / 100) :  lines.size() -1;
-	    	historyLines = (String[])lines.subList(fromIndex, toIndex).toArray();
+	    	
+	    	int toIndex = fromStart ? ((lines.size() * percentage / 100)) :  lines.size() -1;
+	    	historyLines = lines.subList(fromIndex, toIndex);
+	    	log.info("**** " + historyLines.size() + " selected.");
 	    	currentIndex  = 0;
 	    	currentHistory = new int[HISTORY_SIZE];
 	    }
@@ -56,16 +70,16 @@ public class ConsumerHistoryManager {
 			
 		private void parseHistoryLine(String line)
 		{
-			String[] parts = line.split(" ");
+			String[] parts = line.split("\t")[1].split(" ");
 			//load the history : HISTORY_SIZE skipping TEST_PERIOD 
-			for(int i = 1 + TEST_PERIOD; i < HISTORY_SIZE; ++i)
+			for(int i = TEST_PERIOD; i < HISTORY_SIZE; ++i)
 			{
-				currentHistory[i - TEST_PERIOD - 1] = Integer.parseInt(parts[i]);
+				currentHistory[i - TEST_PERIOD] = Integer.parseInt(parts[i]);
 			}
 			//Now compute the label.
 			//If at least the user spent if the 3 first month, we mark the label as suceed.
 			currentLabel = 0;
-			for(int i = 1; i < 1 + TEST_PERIOD; ++i)
+			for(int i = 0; i < TEST_PERIOD; ++i)
 			{
 				if(Integer.parseInt(parts[i]) > 0)
 				{
@@ -77,10 +91,14 @@ public class ConsumerHistoryManager {
 
 		public boolean readElement(int i) {
 			currentIndex = i;
-			if(currentIndex >= historyLines.length)
+			if(!hasMore())
 				return false;			
-			parseHistoryLine(historyLines[i]);
+			parseHistoryLine(historyLines.get(i));
 			return true;
+		}
+
+		public boolean hasMore() {
+			return currentIndex < historyLines.size();
 		}
 
 }

@@ -9,10 +9,18 @@ import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 
 import com.consumer.java.datasets.consumerHistory.ConsumerHistoryDataSetIterator;
+import com.consumer.java.datasets.consumerHistory.ConsumerHistoryManager;
 
 public class ConsumerHistoryDeepLearning extends HistoryDeepLearning {
 
-	JavaRDD<DataSet> createConsumerDataSet(String rootBasePath, String jobParameter, boolean train) throws Exception
+	public ConsumerHistoryDeepLearning()
+	{
+		super();
+		this.inNeuronCount = ConsumerHistoryManager.HISTORY_SIZE;
+		this.outNeuronCount = 2;
+	}
+	
+	private JavaRDD<DataSet> createConsumerDataSet(String rootBasePath, String jobParameter, boolean train) throws Exception
 	{
 		 
 		DataSetIterator iterTrain = new ConsumerHistoryDataSetIterator(rootBasePath, jobParameter, batchSizePerWorker, true, 12345);
