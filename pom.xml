@@ -13,7 +13,7 @@
 		<scala.tools.version>2.10</scala.tools.version>
 		<!-- Put the Scala version of the cluster -->
 		<scala.version>2.11.8</scala.version>
-		<spark.version>1.6.0</spark.version>		
+		<spark.version>2.1.1</spark.version>		
 		 <spark.scope>compile</spark.scope>
 		<scala.binary.version>2.11</scala.binary.version>
 	
@@ -22,8 +22,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <shadedClassifier>bin</shadedClassifier>
         <java.version>1.8</java.version>
-        <nd4j.version>0.6.0</nd4j.version>
-        <dl4j.version>0.6.0</dl4j.version>
+        <nd4j.version>0.8.0</nd4j.version>
+        <dl4j.version>0.8.0_spark_2</dl4j.version>
+        <corenlp.version>3.7.0</corenlp.version>
         <datavec.version>0.6.0</datavec.version>
         <arbiter.version>0.6.0</arbiter.version>
         <guava.version>19.0</guava.version>
@@ -39,6 +40,7 @@
 	</properties>
 	
 	<!-- repository to add org.apache.spark -->
+	
 	<!--<repositories>
 		<repository>
 			<id>cloudera-repo-releases</id>
@@ -167,7 +169,19 @@
                 </exclusion>
             </exclusions> -->
         </dependency>
-
+        <dependency>
+           <groupId>edu.stanford.nlp</groupId>
+           <artifactId>stanford-corenlp</artifactId>
+           <version>${corenlp.version}</version>      
+        </dependency> 
+        <dependency>
+          <groupId>edu.stanford.nlp</groupId>
+          <artifactId>stanford-corenlp</artifactId>
+          <version>${corenlp.version}</version>
+          <classifier>models</classifier>
+		</dependency>
+        <!-- https://mvnrepository.com/artifact/databricks/spark-corenlp -->        
+   
 	</dependencies>
 	<groupId>com.consumer</groupId>
 	<description>This is a spark poc</description>
